@@ -43,8 +43,6 @@ call dein#add('tpope/vim-rails')
 call dein#add('kana/vim-textobj-user')
 call dein#add('nelstrom/vim-textobj-rubyblock')
 call dein#add('tpope/vim-bundler')
-" Autopairs
-call dein#add('jiangmiao/auto-pairs')
 " RSpec
 call dein#add('thoughtbot/vim-rspec')
 call dein#add('jgdavey/tslime.vim')
@@ -73,8 +71,12 @@ call dein#add('terryma/vim-multiple-cursors')
 " Better whitespace handling
 call dein#add('ntpeters/vim-better-whitespace')
 
+call dein#add('Konfekt/FoldText')
+call dein#add('Konfekt/FastFold')
+
 " You can specify revision/branch/tag.
 call dein#add('Shougo/vimshell', { 'rev': '3787e5' })
+
 
 " Required:
 call dein#end()
@@ -252,6 +254,11 @@ nnoremap <leader>go :Git checkout<Space>
 " Eval ruby files
 map <leader>r :!ruby %<cr>
 
+" Toggle Paste
+nnoremap <leader>p :set invpaste paste?<CR>
+imap <leader>p <C-O>:set invpaste paste?<CR>
+set pastetoggle=<leader>p
+
 " Addes line numbers to :Explore
 let g:netrw_bufsettings = "noma nomod nu nobl nowrap ro rnu"
 
@@ -302,6 +309,52 @@ let g:rspec_runner = "os_x_iterm2"
 " let g:rspec_command = 'call Send_to_Tmux("spring rspec {spec}\n")'
 let g:rspec_command = "Dispatch bin/rspec {spec}"
 
+
+set foldmethod=syntax
+
+" { Syntax Folding
+  let g:vimsyn_folding='af'
+  let ruby_fold = 1
+" }
+
+set foldenable
+set foldlevel=0
+set foldlevelstart=0
+" specifies for which commands a fold will be opened
+set foldopen=block,hor,insert,jump,mark,percent,quickfix,search,tag,undo
+
+let g:tex_fold_enabled=1
+let g:vimsyn_folding='af'
+let g:ruby_fold = 1
+
+nnoremap <silent> zr zr:<c-u>setlocal foldlevel?<CR>
+nnoremap <silent> zm zm:<c-u>setlocal foldlevel?<CR>
+
+nnoremap <silent> zR zR:<c-u>setlocal foldlevel?<CR>
+nnoremap <silent> zM zM:<c-u>setlocal foldlevel?<CR>
+
+" Change Option Folds
+nnoremap zi  :<c-u>call <SID>ToggleFoldcolumn(1)<CR>
+nnoremap coz :<c-u>call <SID>ToggleFoldcolumn(0)<CR>
+nmap     cof coz
+
+function! s:ToggleFoldcolumn(fold)
+  if &foldcolumn
+    let w:foldcolumn = &foldcolumn
+    silent setlocal foldcolumn=0
+    if a:fold | silent setlocal nofoldenable | endif
+  else
+      if exists('w:foldcolumn') && (w:foldcolumn!=0)
+        silent let &l:foldcolumn=w:foldcolumn
+      else
+        silent setlocal foldcolumn=4
+      endif
+      if a:fold | silent setlocal foldenable | endif
+  endif
+  setlocal foldcolumn?
+endfunction
+
+
 "Syntastic configuration
 set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
@@ -309,3 +362,27 @@ set statusline+=%*
 
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
+
+augroup AutoSwap
+        autocmd!
+        autocmd SwapExists *  call AS_HandleSwapfile(expand('<afile>:p'), v:swapname)
+augroup END
+
+function! AS_HandleSwapfile (filename, swapname)
+        " if swapfile is older than file itself, just get rid of it
+        if getftime(v:swapname) < getftime(a:filename)
+                call delete(v:swapname)
+                let v:swapchoice = 'e'
+        endif
+endfunction
+autocmd CursorHold,BufWritePost,BufReadPost,BufLeave *
+  \ if isdirectory(expand("<amatch>:h")) | let &swapfile = &modified | endif
+
+augroup checktime
+    au!
+    if !has("gui_running")
+        "silent! necessary otherwise throws errors when using command
+        "line window.
+        autocmd BufEnter,CursorHold,CursorHoldI,CursorMoved,CursorMovedI,FocusGained,BufEnter,FocusLost,WinLeave * checktime
+    endif
+augroup END
