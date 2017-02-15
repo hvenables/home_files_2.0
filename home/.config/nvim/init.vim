@@ -74,6 +74,9 @@ call dein#add('ntpeters/vim-better-whitespace')
 call dein#add('Konfekt/FoldText')
 call dein#add('Konfekt/FastFold')
 
+" Opening from quicksplit
+call dein#add('yssl/QFEnter')
+
 " You can specify revision/branch/tag.
 call dein#add('Shougo/vimshell', { 'rev': '3787e5' })
 
@@ -178,6 +181,10 @@ map <Leader>v :vnew <C-R>=escape(expand("%:p:h"), ' ') . '/'<CR>
 nmap j gj
 nmap k gk
 
+" make opening and closing of folds easier
+nmap <Leader>z zO
+nmap <Leader>c zc
+
 " search next/previous -- center in page
 nmap n nzz
 nmap N Nzz
@@ -226,6 +233,9 @@ nmap <Leader>av :AV<CR>
 nmap <Leader>re :RE<CR>
 nmap <Leader>rv :RV<CR>
 
+" Stop spring
+nmap <Leader>ss :!spring stop<CR>
+
 nmap <Leader>ec :Econtroller<space>
 nmap <Leader>vc :Vcontroller<space>
 nmap <Leader>em :Emodel<space>
@@ -251,6 +261,15 @@ nnoremap <leader>gm :Gmove<Space>
 nnoremap <leader>gb :Gblame<CR>
 nnoremap <leader>go :Git checkout<Space>
 
+" Navigating from terminal
+nmap <leader>tr :vsp<CR>:terminal<CR>
+nmap <leader>tn :tabnew<CR>:terminal<CR>
+tnoremap <Esc> <C-\><C-n>
+tnoremap <C-h> <C-\><C-n><C-w>h
+tnoremap <C-j> <C-\><C-n><C-w>j
+tnoremap <C-k> <C-\><C-n><C-w>k
+tnoremap <C-l> <C-\><C-n><C-w>l
+
 " Eval ruby files
 map <leader>r :!ruby %<cr>
 
@@ -258,6 +277,11 @@ map <leader>r :!ruby %<cr>
 nnoremap <leader>p :set invpaste paste?<CR>
 imap <leader>p <C-O>:set invpaste paste?<CR>
 set pastetoggle=<leader>p
+
+" Hash rocket removal command
+command! -range=% RemoveHashRocket silent execute <line1>.','.<line2>.'s/:\(\w\+\)\s*=>\s*/\1: /g'
+nmap <Leader>hr :RemoveHashRocket<CR>
+
 
 " Addes line numbers to :Explore
 let g:netrw_bufsettings = "noma nomod nu nobl nowrap ro rnu"
@@ -318,8 +342,8 @@ set foldmethod=syntax
 " }
 
 set foldenable
-set foldlevel=0
-set foldlevelstart=0
+set foldlevel=1
+set foldlevelstart=1
 " specifies for which commands a fold will be opened
 set foldopen=block,hor,insert,jump,mark,percent,quickfix,search,tag,undo
 
@@ -359,6 +383,7 @@ endfunction
 set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
+set statusline+=%{fugitive#statusline()}
 
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
@@ -386,3 +411,8 @@ augroup checktime
         autocmd BufEnter,CursorHold,CursorHoldI,CursorMoved,CursorMovedI,FocusGained,BufEnter,FocusLost,WinLeave * checktime
     endif
 augroup END
+
+" QFEnter options
+let g:qfenter_vopen_map = ['<C-v>']
+let g:qfenter_hopen_map = ['<C-CR>', '<C-s>', '<C-x>']
+let g:qfenter_topen_map = ['<C-t>']
