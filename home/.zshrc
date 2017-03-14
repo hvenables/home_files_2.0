@@ -1,7 +1,10 @@
 # If you come from bash you might have to change your $PATH.
 export PATH=$HOME/bin:/usr/local/bin:/Users/harry/.bin:$PATH
 
+# RVM (ruby version manager)
+
 # Path to your oh-my-zsh installation.
+
 export ZSH=/Users/harry/.oh-my-zsh
 
 # Set name of the theme to load. Optionally, if you set this to "random"
@@ -55,6 +58,11 @@ plugins=(git rails ruby brew npm zsh-syntax-highlighting zsh-autosuggestions)
 
 source $ZSH/oh-my-zsh.sh
 
+# source for auto highlighting plugin in zsh shell
+source ~/.oh-my-zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+setopt correct
+
 # User configuration
 
 export EDITOR=vim
@@ -86,9 +94,29 @@ export EDITOR=vim
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-# source for auto highlighting plugin in zsh shell
-source ~/.oh-my-zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh  
-setopt correct
+function mygr8() {
+  bin/rake db:migrate
+  bin/rake db:migrate RAILS_ENV=test
+}
+
+function update(){
+  git fetch origin master:master && git rebase master
+}
+
+function ssh-copy-id() {
+  cat ~/.ssh/id_rsa.pub | ssh $1 "mkdir -p ~/.ssh; cat >> ~/.ssh/authorized_keys";
+}
+
+function mcd() { # creates a directory and places you in it
+  mkdir -p $1
+  cd $1
+}
+
+alias vim=nvim
+
+alias bx='bundle exec'
+
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
 
 # source for z autocomplete
 . `brew --prefix`/etc/profile.d/z.sh
@@ -96,4 +124,6 @@ setopt correct
 # use vim as the default pager for man pages
 export MANPAGER="col -b | vim -c 'set ft=man ts=8 nomod nolist nonu' -c 'nnoremap i <nop>' -"
 
+export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"

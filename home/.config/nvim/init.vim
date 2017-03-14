@@ -166,7 +166,6 @@ set shiftwidth=2
 set shiftround
 set expandtab
 
-
 "==============================================================================
 " Easy access to start of the line
 nmap 0 ^
@@ -342,8 +341,8 @@ set foldmethod=syntax
 " }
 
 set foldenable
-set foldlevel=1
-set foldlevelstart=1
+set foldlevel=0
+set foldlevelstart=0
 " specifies for which commands a fold will be opened
 set foldopen=block,hor,insert,jump,mark,percent,quickfix,search,tag,undo
 
@@ -416,3 +415,8 @@ augroup END
 let g:qfenter_vopen_map = ['<C-v>']
 let g:qfenter_hopen_map = ['<C-CR>', '<C-s>', '<C-x>']
 let g:qfenter_topen_map = ['<C-t>']
+
+" Gem rvm-ctags adds ctags to ruby to jump to ruby definitions
+autocmd FileType ruby 
+  \ let &tags .= "," . $MY_RUBY_HOME . "/lib/tags" |
+  \ let &path .= "," . $MY_RUBY_HOME . "/lib"
