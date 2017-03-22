@@ -1,1 +1,4 @@
-# home_files_2.0
+# My Home Files
+
+1. Download iTerm2
+2. Get Fira Code
