@@ -11,6 +11,7 @@
 " possible, as it has side effects.
 set nocompatible
 
+
 " Required:
 set runtimepath+=/Users/harry/.config/nvim/repos/github.com/Shougo/dein.vim
 
@@ -29,11 +30,13 @@ call dein#add('tpope/vim-surround')
 call dein#add('tpope/vim-repeat')
 call dein#add('roman/golden-ratio')
 call dein#add('easymotion/vim-easymotion')
-call dein#add('scrooloose/syntastic')
 call dein#add('tpope/vim-commentary')
 call dein#add('tpope/vim-endwise')
 call dein#add('tpope/vim-unimpaired')
 call dein#add('tpope/vim-dispatch')
+
+call dein#add('neomake/neomake')
+
 call dein#add('rking/ag.vim')
 " Git
 call dein#add('tpope/vim-fugitive')
@@ -79,6 +82,8 @@ call dein#add('yssl/QFEnter')
 
 " You can specify revision/branch/tag.
 call dein#add('Shougo/vimshell', { 'rev': '3787e5' })
+call dein#add('Shougo/deoplete.nvim')
+call dein#add('fishbullet/deoplete-ruby')
 
 
 " Required:
@@ -92,6 +97,7 @@ syntax enable
 if dein#check_install()
   call dein#install()
 endif
+
 
 "End dein Scripts-------------------------
 
@@ -112,6 +118,20 @@ let g:solarized_termcolors=256
 syntax enable
 set background=dark
 colorscheme solarized
+
+let g:deoplete#enable_at_startup = 1
+if !exists('g:deoplete#omni#input_patterns')
+  let g:deoplete#omni#input_patterns = {}
+endif
+" let g:deoplete#disable_auto_complete = 1
+autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
+" deoplete tab-complete
+inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
+
+let g:deoplete#omni#functions = {}
+let g:deoplete#omni#functions.ruby = [
+  \ 'fishbullet#deoplete-ruby',
+\]
 
 " Airline status bar config
 let g:airline_theme='solarized'
@@ -188,6 +208,10 @@ nmap <Leader>c zc
 nmap n nzz
 nmap N Nzz
 
+" jump between methods
+nmap <Leader>k [m
+nmap <Leader>j ]m
+
 " Strip Whitespace
 nnoremap <leader>ws :StripWhitespace<CR>
 
@@ -231,16 +255,15 @@ nmap <Leader>ae :AE<CR>
 nmap <Leader>av :AV<CR>
 nmap <Leader>re :RE<CR>
 nmap <Leader>rv :RV<CR>
-
-" Stop spring
-nmap <Leader>ss :!spring stop<CR>
-
 nmap <Leader>ec :Econtroller<space>
 nmap <Leader>vc :Vcontroller<space>
 nmap <Leader>em :Emodel<space>
 nmap <Leader>vm :Vmodel<space>
 nmap <Leader>ev :Eview<space>
 nmap <Leader>vv :Vview<space>
+
+" Stop spring
+nmap <Leader>ss :!spring stop<CR>
 
 command! Q q " bind :Q to :q
 command! E e " bind :E to :e
@@ -280,6 +303,10 @@ set pastetoggle=<leader>p
 " Hash rocket removal command
 command! -range=% RemoveHashRocket silent execute <line1>.','.<line2>.'s/:\(\w\+\)\s*=>\s*/\1: /g'
 nmap <Leader>hr :RemoveHashRocket<CR>
+
+" Custom commands for navigating with ctags
+map <Leader>[ :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
+map <Leader>] :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
 
 
 " Addes line numbers to :Explore
@@ -332,23 +359,17 @@ let g:rspec_runner = "os_x_iterm2"
 " let g:rspec_command = 'call Send_to_Tmux("spring rspec {spec}\n")'
 let g:rspec_command = "Dispatch bin/rspec {spec}"
 
-
+" Folding
 set foldmethod=syntax
-
-" { Syntax Folding
-  let g:vimsyn_folding='af'
-  let ruby_fold = 1
-" }
-
-set foldenable
+let g:vimsyn_folding='af'
+let ruby_fold = 1
+let g:tex_fold_enabled=1
 set foldlevel=0
+set foldenable
 set foldlevelstart=0
 " specifies for which commands a fold will be opened
 set foldopen=block,hor,insert,jump,mark,percent,quickfix,search,tag,undo
 
-let g:tex_fold_enabled=1
-let g:vimsyn_folding='af'
-let g:ruby_fold = 1
 
 nnoremap <silent> zr zr:<c-u>setlocal foldlevel?<CR>
 nnoremap <silent> zm zm:<c-u>setlocal foldlevel?<CR>
@@ -377,15 +398,31 @@ function! s:ToggleFoldcolumn(fold)
   setlocal foldcolumn?
 endfunction
 
+" Neomake Config
+" brew install elixir
+autocmd! BufWritePost *.ex Neomake elixir
+" gem install rubocop
+autocmd! BufWritePost *.rb Neomake rubocop
+" npm install -g coffeelint
+autocmd! BufWritePost *.coffee Neomake coffeelint
+" gem install haml_lint
+autocmd BufWritePost *.haml Neomake hamllint
 
-"Syntastic configuration
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
+let g:neomake_verbose=0
+let g:neomake_warning_sign = {
+      \ 'text': '⚠',
+      \ 'texthl': 'WarningMsg',
+      \ }
+let g:neomake_error_sign = {
+      \ 'text': '⚠',
+      \ 'texthl': 'ErrorMsg',
+      \ }
+
+" Statusline config
+set statusline+=\ %#ErrorMsg#%{neomake#statusline#QflistStatus('qf:\ ')}
 set statusline+=%*
 set statusline+=%{fugitive#statusline()}
 
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
 
 augroup AutoSwap
         autocmd!
@@ -417,6 +454,6 @@ let g:qfenter_hopen_map = ['<C-CR>', '<C-s>', '<C-x>']
 let g:qfenter_topen_map = ['<C-t>']
 
 " Gem rvm-ctags adds ctags to ruby to jump to ruby definitions
-autocmd FileType ruby 
+autocmd FileType ruby
   \ let &tags .= "," . $MY_RUBY_HOME . "/lib/tags" |
   \ let &path .= "," . $MY_RUBY_HOME . "/lib"
