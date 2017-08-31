@@ -125,13 +125,28 @@ if !exists('g:deoplete#omni#input_patterns')
 endif
 " let g:deoplete#disable_auto_complete = 1
 autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
-" deoplete tab-complete
-inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 
 let g:deoplete#omni#functions = {}
 let g:deoplete#omni#functions.ruby = [
   \ 'fishbullet#deoplete-ruby',
 \]
+
+"use <tab> for completion
+function! TabWrap()
+    if pumvisible()
+        return "\<C-N>"
+    elseif strpart( getline('.'), 0, col('.') - 1 ) =~ '^\s*$'
+        return "\<tab>"
+    elseif &omnifunc !~ ''
+        return "\<C-X>\<C-O>"
+    else
+        return "\<C-N>"
+    endif
+endfunction
+" power tab
+imap <silent><expr><tab> TabWrap()
+" deoplete tab-complete
+inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 
 " Airline status bar config
 let g:airline_theme='solarized'
@@ -261,6 +276,10 @@ nmap <Leader>em :Emodel<space>
 nmap <Leader>vm :Vmodel<space>
 nmap <Leader>ev :Eview<space>
 nmap <Leader>vv :Vview<space>
+
+nmap <Leader>sv :Server<CR>
+nmap <Leader>ksv :Server!-<CR>
+nmap <Leader>co :Console<CR>
 
 " Stop spring
 nmap <Leader>ss :!spring stop<CR>
@@ -452,6 +471,10 @@ augroup END
 let g:qfenter_vopen_map = ['<C-v>']
 let g:qfenter_hopen_map = ['<C-CR>', '<C-s>', '<C-x>']
 let g:qfenter_topen_map = ['<C-t>']
+
+" Netrw options
+let g:netrw_liststyle = 1
+let g:netrw_banner = 0
 
 " Gem rvm-ctags adds ctags to ruby to jump to ruby definitions
 autocmd FileType ruby
