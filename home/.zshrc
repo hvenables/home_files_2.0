@@ -5,11 +5,8 @@ export PATH=$HOME/bin:/usr/local/bin:/Users/harry/.bin:$PATH
 
 # Path to your oh-my-zsh installation.
 
-export ZSH=/Users/harry/.oh-my-zsh
+export ZSH=$HOME/.oh-my-zsh
 
-# Set name of the theme to load. Optionally, if you set this to "random"
-# it'll load a random theme each time that oh-my-zsh is loaded.
-# See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
 ZSH_THEME="af-magic"
 
 # Uncomment the following line to use case-sensitive completion.
@@ -65,7 +62,11 @@ setopt correct
 
 # User configuration
 
-export EDITOR=vim
+export EDITOR=/usr/local/bin/nvim
+
+export TWITTER_OAUTH_ID="FpdTAUQHQAUdlhC58DjKBpnVP"
+export TWITTER_OAUTH_SECRET="7Yr6OansByoOeno8M08I6eLst6HfRCUPZ59pkOD8i3bQr6iYzD"
+export GOLFHOST="http://localhost:3000"
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -99,6 +100,17 @@ function mygr8() {
   bin/rake db:migrate RAILS_ENV=test
 }
 
+function rollback() {
+  if [ $1 != "" ]
+  then
+    bin/rake db:rollback STEP=$1
+    bin/rake db:rollback STEP=$1 RAILS_ENV=test
+  else
+    bin/rake db:rollback
+    bin/rake db:rollback RAILS_ENV=test
+  fi
+}
+
 function update(){
   git fetch origin master:master && git rebase master
 }
@@ -113,8 +125,12 @@ function mcd() { # creates a directory and places you in it
 }
 
 alias vim=nvim
-
 alias bx='bundle exec'
+
+# git aliases
+alias gs='git status -s'
+alias gc='git commit -m'
+alias ga='git add'
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
 
@@ -125,5 +141,4 @@ alias bx='bundle exec'
 export MANPAGER="col -b | vim -c 'set ft=man ts=8 nomod nolist nonu' -c 'nnoremap i <nop>' -"
 
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
-
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+fpath=(~/.zsh/Completion $fpath)
