@@ -85,7 +85,6 @@ call dein#add('Shougo/vimshell', { 'rev': '3787e5' })
 call dein#add('Shougo/deoplete.nvim')
 call dein#add('fishbullet/deoplete-ruby')
 
-
 " Required:
 call dein#end()
 
@@ -420,8 +419,12 @@ endfunction
 " Neomake Config
 " brew install elixir
 autocmd! BufWritePost *.ex Neomake elixir
-" gem install rubocop
-autocmd! BufWritePost *.rb Neomake rubocop
+
+if executable('rubocop') == 1
+  " gem install rubocop
+  autocmd! BufWritePost *.rb Neomake rubocop
+endif
+
 " npm install -g coffeelint
 autocmd! BufWritePost *.coffee Neomake coffeelint
 " gem install haml_lint
