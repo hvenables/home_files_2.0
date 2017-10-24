@@ -85,6 +85,8 @@ call dein#add('Shougo/vimshell', { 'rev': '3787e5' })
 call dein#add('Shougo/deoplete.nvim')
 call dein#add('fishbullet/deoplete-ruby')
 
+call dein#add('takac/vim-hardtime')
+
 " Required:
 call dein#end()
 
@@ -152,6 +154,7 @@ let g:airline_theme='solarized'
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#show_buffers = 0
 
+set modelines=0
 set hidden        " Allow buffer change w/o saving
 set ruler         " show the cursor position all the time
 set showcmd       " display incomplete commands
@@ -163,6 +166,7 @@ set autoindent    " always set autoindenting on
 set backspace=2   " Backspace deletes like most programs in insert mode
 set mouse=a       " Enable mouse mode
 set clipboard=unnamed
+set encoding=utf-8
 
 " Open new split panes to right and bottom, which feels more natural
 set splitbelow
@@ -199,6 +203,21 @@ set softtabstop=2
 set shiftwidth=2
 set shiftround
 set expandtab
+
+" Improves searching
+nnoremap / /\v
+vnoremap / /\v
+set ignorecase
+set smartcase
+set incsearch
+set showmatch
+set hlsearch
+nnoremap <leader><space> :noh<cr>
+nnoremap <tab> %
+vnoremap <tab> %
+
+" Autosave on changing focus
+au FocusLost * :wa
 
 "==============================================================================
 " Easy access to start of the line
@@ -304,6 +323,7 @@ nnoremap <leader>go :Git checkout<Space>
 " Navigating from terminal
 nmap <leader>tr :vsp<CR>:terminal<CR>
 nmap <leader>tn :tabnew<CR>:terminal<CR>
+nmap <leader>tc :vsp<CR>:terminal<CR>rails c<CR>
 tnoremap <Esc> <C-\><C-n>
 tnoremap <C-h> <C-\><C-n><C-w>h
 tnoremap <C-j> <C-\><C-n><C-w>j
@@ -326,6 +346,8 @@ nmap <Leader>hr :RemoveHashRocket<CR>
 map <Leader>[ :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
 map <Leader>] :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
 
+" Copy filepath
+nmap <Leader>fp :let @+=@%<CR>
 
 " Addes line numbers to :Explore
 let g:netrw_bufsettings = "noma nomod nu nobl nowrap ro rnu"
@@ -377,44 +399,44 @@ let g:rspec_runner = "os_x_iterm2"
 " let g:rspec_command = 'call Send_to_Tmux("spring rspec {spec}\n")'
 let g:rspec_command = "Dispatch bin/rspec {spec}"
 
-" Folding
-set foldmethod=syntax
-let g:vimsyn_folding='af'
-let ruby_fold = 1
-let g:tex_fold_enabled=1
-set foldlevel=0
-set foldenable
-set foldlevelstart=0
-" specifies for which commands a fold will be opened
-set foldopen=block,hor,insert,jump,mark,percent,quickfix,search,tag,undo
+" " Folding
+" set foldmethod=syntax
+" let g:vimsyn_folding='af'
+" let ruby_fold = 1
+" let g:tex_fold_enabled=1
+" set foldlevel=0
+" set foldenable
+" set foldlevelstart=0
+" " specifies for which commands a fold will be opened
+" set foldopen=block,hor,insert,jump,mark,percent,quickfix,search,tag,undo
 
 
-nnoremap <silent> zr zr:<c-u>setlocal foldlevel?<CR>
-nnoremap <silent> zm zm:<c-u>setlocal foldlevel?<CR>
+" nnoremap <silent> zr zr:<c-u>setlocal foldlevel?<CR>
+" nnoremap <silent> zm zm:<c-u>setlocal foldlevel?<CR>
 
-nnoremap <silent> zR zR:<c-u>setlocal foldlevel?<CR>
-nnoremap <silent> zM zM:<c-u>setlocal foldlevel?<CR>
+" nnoremap <silent> zR zR:<c-u>setlocal foldlevel?<CR>
+" nnoremap <silent> zM zM:<c-u>setlocal foldlevel?<CR>
 
-" Change Option Folds
-nnoremap zi  :<c-u>call <SID>ToggleFoldcolumn(1)<CR>
-nnoremap coz :<c-u>call <SID>ToggleFoldcolumn(0)<CR>
-nmap     cof coz
+" " Change Option Folds
+" nnoremap zi  :<c-u>call <SID>ToggleFoldcolumn(1)<CR>
+" nnoremap coz :<c-u>call <SID>ToggleFoldcolumn(0)<CR>
+" nmap     cof coz
 
-function! s:ToggleFoldcolumn(fold)
-  if &foldcolumn
-    let w:foldcolumn = &foldcolumn
-    silent setlocal foldcolumn=0
-    if a:fold | silent setlocal nofoldenable | endif
-  else
-      if exists('w:foldcolumn') && (w:foldcolumn!=0)
-        silent let &l:foldcolumn=w:foldcolumn
-      else
-        silent setlocal foldcolumn=4
-      endif
-      if a:fold | silent setlocal foldenable | endif
-  endif
-  setlocal foldcolumn?
-endfunction
+" function! s:ToggleFoldcolumn(fold)
+"   if &foldcolumn
+"     let w:foldcolumn = &foldcolumn
+"     silent setlocal foldcolumn=0
+"     if a:fold | silent setlocal nofoldenable | endif
+"   else
+"       if exists('w:foldcolumn') && (w:foldcolumn!=0)
+"         silent let &l:foldcolumn=w:foldcolumn
+"       else
+"         silent setlocal foldcolumn=4
+"       endif
+"       if a:fold | silent setlocal foldenable | endif
+"   endif
+"   setlocal foldcolumn?
+" endfunction
 
 " Neomake Config
 " brew install elixir
@@ -483,3 +505,7 @@ let g:netrw_banner = 0
 autocmd FileType ruby
   \ let &tags .= "," . $MY_RUBY_HOME . "/lib/tags" |
   \ let &path .= "," . $MY_RUBY_HOME . "/lib"
+
+let g:hardtime_default_on = 1
+let g:hardtime_ignore_quickfix = 1
+let g:hardtime_maxcount = 3
