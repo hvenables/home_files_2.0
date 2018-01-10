@@ -34,6 +34,7 @@ call dein#add('tpope/vim-commentary')
 call dein#add('tpope/vim-endwise')
 call dein#add('tpope/vim-unimpaired')
 call dein#add('tpope/vim-dispatch')
+call dein#add('tpope/vim-sleuth')
 
 call dein#add('neomake/neomake')
 
@@ -80,12 +81,11 @@ call dein#add('Konfekt/FastFold')
 " Opening from quicksplit
 call dein#add('yssl/QFEnter')
 
-" You can specify revision/branch/tag.
-call dein#add('Shougo/vimshell', { 'rev': '3787e5' })
+" Highlight when yanking
+call dein#add('machakann/vim-highlightedyank')
+
 call dein#add('Shougo/deoplete.nvim')
 call dein#add('fishbullet/deoplete-ruby')
-
-call dein#add('takac/vim-hardtime')
 
 " Required:
 call dein#end()
@@ -120,17 +120,22 @@ syntax enable
 set background=dark
 colorscheme solarized
 
-let g:deoplete#enable_at_startup = 1
-if !exists('g:deoplete#omni#input_patterns')
-  let g:deoplete#omni#input_patterns = {}
-endif
-" let g:deoplete#disable_auto_complete = 1
-autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
+" deoplete.nvim
+if has('nvim')
+  let g:deoplete#enable_at_startup = 1
 
-let g:deoplete#omni#functions = {}
-let g:deoplete#omni#functions.ruby = [
-  \ 'fishbullet#deoplete-ruby',
-\]
+  let g:deoplete#omni#input_patterns = {}
+  if !exists('g:deoplete#omni#input_patterns')
+    let g:deoplete#omni#input_patterns = {}
+  endif
+  " let g:deoplete#disable_auto_complete = 1
+  autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
+
+  let g:deoplete#omni#functions = {}
+  let g:deoplete#omni#functions.ruby = [
+    \ 'fishbullet#deoplete-ruby',
+  \]
+endif
 
 "use <tab> for completion
 function! TabWrap()
@@ -204,6 +209,10 @@ set shiftwidth=2
 set shiftround
 set expandtab
 
+" Adding special characters to word def
+set iskeyword+=@-@
+set iskeyword+=?
+
 " Improves searching
 nnoremap / /\v
 vnoremap / /\v
@@ -212,12 +221,10 @@ set smartcase
 set incsearch
 set showmatch
 set hlsearch
-nnoremap <leader><space> :noh<cr>
-nnoremap <tab> %
-vnoremap <tab> %
-
 " Autosave on changing focus
-au FocusLost * :wa
+:au FocusLost * silent! wa
+autocmd BufLeave,FocusLost silent! wall
+
 
 "==============================================================================
 " Easy access to start of the line
@@ -323,12 +330,14 @@ nnoremap <leader>go :Git checkout<Space>
 " Navigating from terminal
 nmap <leader>tr :vsp<CR>:terminal<CR>
 nmap <leader>tn :tabnew<CR>:terminal<CR>
-nmap <leader>tc :vsp<CR>:terminal<CR>rails c<CR>
+nmap <leader>tc :vsp<CR>:terminal<CR> i rails c<CR>
 tnoremap <Esc> <C-\><C-n>
 tnoremap <C-h> <C-\><C-n><C-w>h
 tnoremap <C-j> <C-\><C-n><C-w>j
 tnoremap <C-k> <C-\><C-n><C-w>k
 tnoremap <C-l> <C-\><C-n><C-w>l
+
+nmap <leader>gr :GoldenRatioResize<CR>
 
 " Eval ruby files
 map <leader>r :!ruby %<cr>
@@ -348,6 +357,32 @@ map <Leader>] :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
 
 " Copy filepath
 nmap <Leader>fp :let @+=@%<CR>
+
+" Function for jumping to webpages from vim
+function! Goto(site)
+    let l:site = a:site
+    if l:site !~? '^https\?:\/\/'
+        let l:site = 'https://' . l:site
+    endif
+
+    call netrw#BrowseX(l:site, netrw#CheckIfRemote())
+endfun
+
+command! -nargs=1 GoToSite call Goto(<f-args>)
+command! -nargs=1 GoToDevDocs call Goto('http://devdocs.io/#q=' . <f-args>)
+command! -nargs=1 GoToWordDevDocs call Goto('http://devdocs.io/#q=' . expand(<f-args>))
+command! -nargs=1 GoToNephos call Goto('https://cloud.tagadab.com/backoffice/search?utf8=%E2%9C%93&search_type=fuzzy&search_value=' . <f-args> . '&commit=Perform+Search')
+command! -nargs=1 GoToTickets call Goto('https://ticket.tagadab.com/search?utf8=%E2%9C%93&search=' . <f-args>)
+command! -nargs=1 GoToConcord call Goto('https://admin.tagadab.com/pacman/search/search?search_value=' . <f-args> . '&search_param=generic&search=Search')
+command! -nargs=1 GoToGitlab call Goto('http://git.tagadab.com/apps/' . <f-args> . '/pipelines')
+
+nnoremap <Leader>g :GoToSite<space>
+nnoremap <Leader>d :GoToDevDocs<space>
+nnoremap <Leader>df :GoToWordDevDocs<space><cword><CR>
+nnoremap <Leader>np :GoToNephos<space>
+nnoremap <Leader>tt :GoToTickets<space>
+nnoremap <Leader>cc :GoToConcord<space>
+nnoremap <Leader>gt :GoToGitlab<space>
 
 " Addes line numbers to :Explore
 let g:netrw_bufsettings = "noma nomod nu nobl nowrap ro rnu"
@@ -458,8 +493,11 @@ let g:neomake_warning_sign = {
       \ 'texthl': 'WarningMsg',
       \ }
 let g:neomake_error_sign = {
-      \ 'text': '⚠',
+      \ 'text': '✘',
       \ 'texthl': 'ErrorMsg',
+      \ }
+let g:neomake_info_sign = {
+      \ 'text': '➤'
       \ }
 
 " Statusline config
@@ -505,7 +543,3 @@ let g:netrw_banner = 0
 autocmd FileType ruby
   \ let &tags .= "," . $MY_RUBY_HOME . "/lib/tags" |
   \ let &path .= "," . $MY_RUBY_HOME . "/lib"
-
-let g:hardtime_default_on = 1
-let g:hardtime_ignore_quickfix = 1
-let g:hardtime_maxcount = 3
