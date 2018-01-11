@@ -26,7 +26,7 @@ ZSH_THEME="af-magic"
 # DISABLE_LS_COLORS="true"
 
 # Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
+DISABLE_AUTO_TITLE="true"
 
 # Uncomment the following line to enable command auto-correction.
 # ENABLE_CORRECTION="true"
@@ -66,7 +66,6 @@ export EDITOR=/usr/local/bin/nvim
 
 export TWITTER_OAUTH_ID="FpdTAUQHQAUdlhC58DjKBpnVP"
 export TWITTER_OAUTH_SECRET="7Yr6OansByoOeno8M08I6eLst6HfRCUPZ59pkOD8i3bQr6iYzD"
-export GOLFHOST="http://localhost:3000"
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -94,6 +93,10 @@ export GOLFHOST="http://localhost:3000"
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+function chpwd() {
+  echo -ne "\e]1;${PWD##*/}\a"
+}
 
 function mygr8() {
   bin/rake db:migrate
@@ -127,10 +130,17 @@ function mcd() { # creates a directory and places you in it
 alias vim=nvim
 alias bx='bundle exec'
 
+alias rake='noglob rake'
+
 # git aliases
 alias gs='git status -s'
-alias gc='git commit -m'
+alias gc='git commit'
 alias ga='git add'
+alias gd='git diff -w --patience'
+alias gpo='git push origin'
+alias gplo='git pull origin'
+
+alias rgm='rails g migration'
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
 
@@ -142,3 +152,6 @@ export MANPAGER="col -b | vim -c 'set ft=man ts=8 nomod nolist nonu' -c 'nnorema
 
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 fpath=(~/.zsh/Completion $fpath)
+
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+

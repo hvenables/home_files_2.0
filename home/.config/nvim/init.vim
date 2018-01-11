@@ -11,7 +11,6 @@
 " possible, as it has side effects.
 set nocompatible
 
-
 " Required:
 set runtimepath+=/Users/harry/.config/nvim/repos/github.com/Shougo/dein.vim
 
@@ -87,6 +86,8 @@ call dein#add('machakann/vim-highlightedyank')
 call dein#add('Shougo/deoplete.nvim')
 call dein#add('fishbullet/deoplete-ruby')
 
+call dein#add('radenling/vim-dispatch-neovim')
+
 " Required:
 call dein#end()
 
@@ -158,13 +159,18 @@ inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 let g:airline_theme='solarized'
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#show_buffers = 0
+let g:airline_section_z = '%{strftime("%a %d %b, %H:%M:%S")}'
+function! UpdateTime(timer)
+  call airline#update_statusline()
+endfunction
+let g:airline#extensions#clock#timer = timer_start(1000, 'UpdateTime', {'repeat':-1})
 
 set modelines=0
 set hidden        " Allow buffer change w/o saving
 set ruler         " show the cursor position all the time
 set showcmd       " display incomplete commands
 set incsearch     " do incremental searching
-set laststatus=2  " Always display the status line
+" set laststatus=2  " Always display the status line
 set autowrite     " Automatically :write before running commands
 set cursorline    " highlight the current line the cursor is on
 set autoindent    " always set autoindenting on
@@ -330,7 +336,7 @@ nnoremap <leader>go :Git checkout<Space>
 " Navigating from terminal
 nmap <leader>tr :vsp<CR>:terminal<CR>
 nmap <leader>tn :tabnew<CR>:terminal<CR>
-nmap <leader>tc :vsp<CR>:terminal<CR> i rails c<CR>
+nmap <leader>tc :vsp<CR>:terminal<CR> rails c<CR>
 tnoremap <Esc> <C-\><C-n>
 tnoremap <C-h> <C-\><C-n><C-w>h
 tnoremap <C-j> <C-\><C-n><C-w>j
@@ -501,10 +507,9 @@ let g:neomake_info_sign = {
       \ }
 
 " Statusline config
-set statusline+=\ %#ErrorMsg#%{neomake#statusline#QflistStatus('qf:\ ')}
-set statusline+=%*
-set statusline+=%{fugitive#statusline()}
-
+" set statusline+=\ %#ErrorMsg#%{neomake#statusline#QflistStatus('qf:\ ')}
+" set statusline+=%*
+" set statusline+=%{fugitive#statusline()}
 
 augroup AutoSwap
         autocmd!
@@ -543,3 +548,73 @@ let g:netrw_banner = 0
 autocmd FileType ruby
   \ let &tags .= "," . $MY_RUBY_HOME . "/lib/tags" |
   \ let &path .= "," . $MY_RUBY_HOME . "/lib"
+
+" Store visual selection marks, save, restore visual selection marks
+function! SaveAndRestoreVisualSelectionMarks() abort
+  let l:fname = expand("%")
+  if filereadable(l:fname) && match(readfile(l:fname), "text")
+    let start_mark = getpos("'[")
+    let end_mark = getpos("']")
+
+    try
+      silent write
+    catch
+    finally
+      call setpos("'[", start_mark)
+      call setpos("']", end_mark)
+    endtry
+  endif
+endfunction
+
+"==============================[ SetNumberDisplay ]=============================
+" Varies the display of numbers.
+"
+" This is not a 'mode' specific setting, so a simple autocommand won't work.
+" Numbers should not show up in a terminal buffer, regardless of if that
+" buffer is in terminal mode or not.
+"===============================================================================
+
+function! SetNumberDisplay()
+  if &buftype == 'terminal'
+    setlocal nonumber
+    setlocal norelativenumber
+  else
+    set number
+    set relativenumber
+  endif
+endfunction
+
+function! InsertMode()
+  if expand('%:t') != 'rails server'
+    startinsert
+  endif
+endfunction
+
+augroup startup
+  autocmd!
+
+  " save whenever things change
+  autocmd TextChanged,InsertLeave * call SaveAndRestoreVisualSelectionMarks()
+
+  " turn numbers on for normal buffers; turn them off for terminal buffers
+  autocmd TermOpen,BufWinEnter * call SetNumberDisplay()
+
+  " when in a neovim terminal, add a buffer to the existing vim session
+  " instead of nesting (credit justinmk)
+  autocmd VimEnter * if !empty($NVIM_LISTEN_ADDRESS) && $NVIM_LISTEN_ADDRESS !=# v:servername
+    \ |let g:r=jobstart(['nc', '-U', $NVIM_LISTEN_ADDRESS],{'rpc':v:true})
+    \ |let g:f=fnameescape(expand('%:p'))
+    \ |noau bwipe
+    \ |call rpcrequest(g:r, "nvim_command", "edit ".g:f)
+    \ |call rpcrequest(g:r, "nvim_command", "call SetNumberDisplay()")
+    \ |qa
+    \ |endif
+
+  " use relative numbers for focused area (maybe turn this back on with a
+  " check for if number is turned on or not?)
+  " autocmd BufEnter,FocusGained * call lib#NumberToggle(1)
+  " autocmd BufLeave,FocusLost * call lib#NumberToggle(0)
+
+  " enter insert mode whenever we're in a terminal
+  autocmd TermOpen,BufWinEnter,BufEnter term://* call InsertMode()
+augroup END
