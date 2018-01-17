@@ -94,7 +94,7 @@ export TWITTER_OAUTH_SECRET="7Yr6OansByoOeno8M08I6eLst6HfRCUPZ59pkOD8i3bQr6iYzD"
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-function chpwd() {
+function precmd() {
   echo -ne "\e]1;${PWD##*/}\a"
 }
 
@@ -133,6 +133,8 @@ alias bx='bundle exec'
 alias rake='noglob rake'
 
 # git aliases
+alias git='noglob git'
+
 alias gs='git status -s'
 alias gc='git commit'
 alias ga='git add'
