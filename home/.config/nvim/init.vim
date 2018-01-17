@@ -37,6 +37,8 @@ call dein#add('tpope/vim-sleuth')
 
 call dein#add('neomake/neomake')
 
+call dein#add('yssl/QFEnter')
+
 call dein#add('rking/ag.vim')
 " Git
 call dein#add('tpope/vim-fugitive')
@@ -57,8 +59,6 @@ call dein#add('pangloss/vim-javascript')
 call dein#add('elixir-lang/vim-elixir')
 " Elm
 call dein#add('lambdatoast/elm.vim')
-" Gives DB access to vim
-call dein#add('vim-scripts/dbext.vim')
 " Fuzzy Searching
 call dein#add('ctrlpvim/ctrlp.vim')
 " Nice status bar
@@ -73,12 +73,6 @@ call dein#add('christoomey/vim-tmux-navigator')
 call dein#add('terryma/vim-multiple-cursors')
 " Better whitespace handling
 call dein#add('ntpeters/vim-better-whitespace')
-
-call dein#add('Konfekt/FoldText')
-call dein#add('Konfekt/FastFold')
-
-" Opening from quicksplit
-call dein#add('yssl/QFEnter')
 
 " Highlight when yanking
 call dein#add('machakann/vim-highlightedyank')
@@ -273,9 +267,6 @@ nmap <Leader>i gg=G''
 
 " Easymotion.vim mappings from https://github.com/easymotion/vim-easymotion
 
-" Default is <leader><leader>
-map <Leader>d <Plug>(easymotion-prefix)
-
 " <Leader>f{char} to move to {char}
 map  <Leader>f <Plug>(easymotion-bd-f)
 nmap <Leader>f <Plug>(easymotion-overwin-f)
@@ -292,10 +283,10 @@ map  <Leader>w <Plug>(easymotion-bd-w)
 nmap <Leader>w <Plug>(easymotion-overwin-w)
 
 " RSpec.vim mappings
-map <Leader>t :call RunCurrentSpecFile()<CR>
-map <Leader>s :call RunNearestSpec()<CR>
-map <Leader>l :call RunLastSpec()<CR>
-map <Leader>a :call RunAllSpecs()<CR>
+map <Leader>t :GoldenRatioToggle<CR>:call RunCurrentSpecFile()<CR>:GoldenRatioToggle<CR>
+map <Leader>s :GoldenRatioToggle<CR>:call RunNearestSpec()<CR>:GoldenRatioToggle<CR>
+map <Leader>l :GoldenRatioToggle<CR>:call RunLastSpec()<CR>:GoldenRatioToggle<CR>
+map <Leader>a :GoldenRatioToggle<CR>:call RunAllSpecs()<CR>:GoldenRatioToggle<CR>
 
 " Rails.vim mappings
 nmap <Leader>ae :AE<CR>
@@ -335,7 +326,7 @@ nnoremap <leader>gb :Gblame<CR>
 nnoremap <leader>go :Git checkout<Space>
 
 " Navigating from terminal
-nmap <leader>tr :vsp<CR>:terminal<CR>
+nmap <leader>tr :terminal<CR>
 nmap <leader>tn :tabnew<CR>:terminal<CR>
 nmap <leader>tc :vsp<CR>:terminal<CR> rails c<CR>
 tnoremap <Esc> <C-\><C-n>
@@ -378,17 +369,11 @@ endfun
 command! -nargs=1 GoToSite call Goto(<f-args>)
 command! -nargs=1 GoToDevDocs call Goto('http://devdocs.io/#q=' . <f-args>)
 command! -nargs=1 GoToWordDevDocs call Goto('http://devdocs.io/#q=' . expand(<f-args>))
-command! -nargs=1 GoToNephos call Goto('https://cloud.tagadab.com/backoffice/search?utf8=%E2%9C%93&search_type=fuzzy&search_value=' . <f-args> . '&commit=Perform+Search')
-command! -nargs=1 GoToTickets call Goto('https://ticket.tagadab.com/search?utf8=%E2%9C%93&search=' . <f-args>)
-command! -nargs=1 GoToConcord call Goto('https://admin.tagadab.com/pacman/search/search?search_value=' . <f-args> . '&search_param=generic&search=Search')
 command! -nargs=1 GoToGitlab call Goto('http://git.tagadab.com/apps/' . <f-args> . '/pipelines')
 
 nnoremap <Leader>g :GoToSite<space>
 nnoremap <Leader>d :GoToDevDocs<space>
 nnoremap <Leader>df :GoToWordDevDocs<space><cword><CR>
-nnoremap <Leader>np :GoToNephos<space>
-nnoremap <Leader>tt :GoToTickets<space>
-nnoremap <Leader>cc :GoToConcord<space>
 nnoremap <Leader>gt :GoToGitlab<space>
 
 " Addes line numbers to :Explore
@@ -441,45 +426,6 @@ let g:rspec_runner = "os_x_iterm2"
 " let g:rspec_command = 'call Send_to_Tmux("spring rspec {spec}\n")'
 let g:rspec_command = "Dispatch bin/rspec {spec}"
 
-" " Folding
-" set foldmethod=syntax
-" let g:vimsyn_folding='af'
-" let ruby_fold = 1
-" let g:tex_fold_enabled=1
-" set foldlevel=0
-" set foldenable
-" set foldlevelstart=0
-" " specifies for which commands a fold will be opened
-" set foldopen=block,hor,insert,jump,mark,percent,quickfix,search,tag,undo
-
-
-" nnoremap <silent> zr zr:<c-u>setlocal foldlevel?<CR>
-" nnoremap <silent> zm zm:<c-u>setlocal foldlevel?<CR>
-
-" nnoremap <silent> zR zR:<c-u>setlocal foldlevel?<CR>
-" nnoremap <silent> zM zM:<c-u>setlocal foldlevel?<CR>
-
-" " Change Option Folds
-" nnoremap zi  :<c-u>call <SID>ToggleFoldcolumn(1)<CR>
-" nnoremap coz :<c-u>call <SID>ToggleFoldcolumn(0)<CR>
-" nmap     cof coz
-
-" function! s:ToggleFoldcolumn(fold)
-"   if &foldcolumn
-"     let w:foldcolumn = &foldcolumn
-"     silent setlocal foldcolumn=0
-"     if a:fold | silent setlocal nofoldenable | endif
-"   else
-"       if exists('w:foldcolumn') && (w:foldcolumn!=0)
-"         silent let &l:foldcolumn=w:foldcolumn
-"       else
-"         silent setlocal foldcolumn=4
-"       endif
-"       if a:fold | silent setlocal foldenable | endif
-"   endif
-"   setlocal foldcolumn?
-" endfunction
-
 " Neomake Config
 " brew install elixir
 autocmd! BufWritePost *.ex Neomake elixir
@@ -506,11 +452,6 @@ let g:neomake_error_sign = {
 let g:neomake_info_sign = {
       \ 'text': '➤'
       \ }
-
-" Statusline config
-" set statusline+=\ %#ErrorMsg#%{neomake#statusline#QflistStatus('qf:\ ')}
-" set statusline+=%*
-" set statusline+=%{fugitive#statusline()}
 
 augroup AutoSwap
         autocmd!
@@ -586,7 +527,7 @@ function! SetNumberDisplay()
 endfunction
 
 function! InsertMode()
-  if expand('%:t') != 'rails server' && expand('%t') !~ '_spec'
+  if expand('%t') !~ 'bin/rspec'
     startinsert
   endif
 endfunction
@@ -630,15 +571,22 @@ nvimux.config.set_all{
   new_window_buffer = 'single',
   quickterm_direction = 'botright',
   quickterm_orientation = 'vertical',
-  -- Use 'g' for global quickterm
-  quickterm_scope = 't',
   quickterm_size = '80',
 }
 
 -- Nvimux custom bindings
 nvimux.bindings.bind_all{
-  {'s', ':NvimuxHorizontalSplit', {'n', 'v', 'i', 't'}},
+  {'-', ':NvimuxHorizontalSplit', {'n', 'v', 'i', 't'}},
   {'\\', ':NvimuxVerticalSplit', {'n', 'v', 'i', 't'}},
+  {'1', '<Esc>1gt', {'n', 'v', 'i', 't'}},
+  {'2', '<Esc>2gt', {'n', 'v', 'i', 't'}},
+  {'3', '<Esc>3gt', {'n', 'v', 'i', 't'}},
+  {'4', '<Esc>4gt', {'n', 'v', 'i', 't'}},
+  {'5', '<Esc>5gt', {'n', 'v', 'i', 't'}},
+  {'6', '<Esc>6gt', {'n', 'v', 'i', 't'}},
+  {'7', '<Esc>7gt', {'n', 'v', 'i', 't'}},
+  {'8', '<Esc>8gt', {'n', 'v', 'i', 't'}},
+  {'9', '<Esc>9gt', {'n', 'v', 'i', 't'}},
 }
 
 -- Required so nvimux sets the mappings correctly
